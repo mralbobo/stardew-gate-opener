@@ -9,20 +9,6 @@ using StardewModdingAPI;
 using Newtonsoft.Json;
 using System.IO;
 
-
-//bugs while playing:
-/*
-    - adding an item to a chest that already has a partial in the open chest and in the remote chest, might duplicate. 
-    Need to add a pre-check for the open chest to give it priority. * probably fixed, nope, seems that the isn't full check broke being able to remote add when
-    theres a full stack
-    - weirdness when item exists in multiple places, possibly only when stacks are mostly full
-
-
-    - need to come up with a system to properly identify if an item should stay in it's current chest
-    if the item matched in the chest is literally the same item, then it should start the move check
-    if it's not, abort
-*/
-
 namespace GateOpener
 {
     public class GateOpenerMainClass : Mod
@@ -38,7 +24,6 @@ namespace GateOpener
             #if DEBUG
             Log.Info(theString);
             #endif
-
         }
 
         static Dictionary<Vector2, StardewValley.Fence> openGates = new Dictionary<Vector2, Fence>();
