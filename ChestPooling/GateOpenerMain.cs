@@ -77,6 +77,7 @@ namespace GateOpener
                 {
                     //myLog(gate.ToString());
                     gate.gatePosition = 88;
+                    Game1.playSound("doorClose");
                 }
 
                 //need to close it now...
@@ -85,6 +86,7 @@ namespace GateOpener
                     if (StardewValley.Game1.player.getTileLocation() != gateObj.Key && !adj.Contains(gateObj.Key) )
                     {
                         gateObj.Value.gatePosition = 0;
+                        Game1.playSound("doorClose");
                         openGates.Remove(gateObj.Key);
                         break;
                     }
