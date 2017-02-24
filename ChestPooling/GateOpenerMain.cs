@@ -13,23 +13,23 @@ namespace GateOpener
 {
     public class GateOpenerMainClass : Mod
     {
-        public override void Entry(params object[] objects)
+        public override void Entry(IModHelper helper)
         {
             //StardewModdingAPI.Events.GameEvents.UpdateTick += Event_Update;
             StardewModdingAPI.Events.GameEvents.FourthUpdateTick += Event_Update;
             
         }
 
-        static void myLog(String theString) { 
+        private void myLog(String theString) { 
             #if DEBUG
-            Log.Info(theString);
+            this.Monitor.Log(theString);
             #endif
         }
 
-        static Dictionary<Vector2, StardewValley.Fence> openGates = new Dictionary<Vector2, Fence>();
+        private Dictionary<Vector2, StardewValley.Fence> openGates = new Dictionary<Vector2, Fence>();
 
 
-        static void debugThing(object theObject, string descriptor = "")
+        private void debugThing(object theObject, string descriptor = "")
         {
             String thing = JsonConvert.SerializeObject(theObject, Formatting.Indented,
             new JsonSerializerSettings
@@ -40,7 +40,7 @@ namespace GateOpener
             Console.WriteLine(descriptor + "\n"+ thing);
         }
 
-        static StardewValley.Fence getGate(Vector2 pos)
+        private StardewValley.Fence getGate(Vector2 pos)
         {
             StardewValley.Locations.BuildableGameLocation loc = StardewValley.Game1.currentLocation as StardewValley.Locations.BuildableGameLocation;
             StardewValley.Object obj;
@@ -57,7 +57,7 @@ namespace GateOpener
             return null;
         }
 
-        static StardewValley.Fence lookAround(List<Vector2> list)
+        private StardewValley.Fence lookAround(List<Vector2> list)
         {
             foreach (Vector2 pos in list)
             {
@@ -67,7 +67,7 @@ namespace GateOpener
             return null;
         }
 
-        static void Event_Update(object sender, EventArgs e)
+        private void Event_Update(object sender, EventArgs e)
         {
             if(StardewValley.Game1.currentLocation is StardewValley.Locations.BuildableGameLocation)
             {
