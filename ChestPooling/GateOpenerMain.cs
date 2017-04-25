@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
-using Newtonsoft.Json;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -39,15 +38,11 @@ namespace GateOpener
         /*********
         ** Private methods
         *********/
-        private void DebugThing(object theObject, string descriptor = "")
+        private void DebugThing(object data, string descriptor = "")
         {
-            String thing = JsonConvert.SerializeObject(theObject, Formatting.Indented,
-            new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            });
-            File.WriteAllText("debug.json", thing);
-            Console.WriteLine(descriptor + "\n" + thing);
+            this.Helper.WriteJsonFile("debug.json", data);
+            string result = File.ReadAllText(Path.Combine(this.Helper.DirectoryPath, "debug.json"));
+            this.Monitor.Log($"{descriptor}\n{result}");
         }
 
         private Fence GetGate(BuildableGameLocation location, Vector2 pos)
