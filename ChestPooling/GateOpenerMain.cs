@@ -1,35 +1,45 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using StardewValley;
-using StardewModdingAPI;
-using Newtonsoft.Json;
 using System.IO;
+using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
+using StardewValley.Locations;
 
 namespace GateOpener
 {
     public class GateOpenerMainClass : Mod
     {
+        /*********
+        ** Properties
+        *********/
+        private readonly Dictionary<Vector2, Fence> OpenGates = new Dictionary<Vector2, Fence>();
+
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            //StardewModdingAPI.Events.GameEvents.UpdateTick += Event_Update;
-            StardewModdingAPI.Events.GameEvents.FourthUpdateTick += Event_Update;
-            
+            GameEvents.FourthUpdateTick += this.GameEvents_FourthUpdateTick;
         }
 
-        private void myLog(String theString) { 
-            #if DEBUG
-            this.Monitor.Log(theString);
-            #endif
+        private void MyLog(String theString)
+        {
+#if DEBUG
+            Monitor.Log(theString);
+#endif
         }
 
-        private Dictionary<Vector2, StardewValley.Fence> openGates = new Dictionary<Vector2, Fence>();
 
-
-        private void debugThing(object theObject, string descriptor = "")
+        /*********
+        ** Private methods
+        *********/
+        private void DebugThing(object theObject, string descriptor = "")
         {
             String thing = JsonConvert.SerializeObject(theObject, Formatting.Indented,
             new JsonSerializerSettings
@@ -37,62 +47,58 @@ namespace GateOpener
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             File.WriteAllText("debug.json", thing);
-            Console.WriteLine(descriptor + "\n"+ thing);
+            Console.WriteLine(descriptor + "\n" + thing);
         }
 
-        private StardewValley.Fence getGate(Vector2 pos)
+        private Fence GetGate(BuildableGameLocation location, Vector2 pos)
         {
-            StardewValley.Locations.BuildableGameLocation loc = StardewValley.Game1.currentLocation as StardewValley.Locations.BuildableGameLocation;
-            StardewValley.Object obj;
-            loc.objects.TryGetValue(pos, out obj);
-            if (obj != null && obj is StardewValley.Fence)
+            if (!location.objects.TryGetValue(pos, out StardewValley.Object obj))
+                return null;
+
+            if (obj is Fence fence && fence.isGate && !this.OpenGates.ContainsKey(pos))
             {
-                StardewValley.Fence gate = obj as StardewValley.Fence;
-                if (gate.isGate && !openGates.ContainsKey(pos))
-                {
-                    openGates[pos] = gate;
-                    return obj as StardewValley.Fence;
-                }
+                this.OpenGates[pos] = fence;
+                return fence;
             }
             return null;
         }
 
-        private StardewValley.Fence lookAround(List<Vector2> list)
+        private Fence LookAround(BuildableGameLocation location, List<Vector2> list)
         {
             foreach (Vector2 pos in list)
             {
-                StardewValley.Fence gate = getGate(pos);
-                if (gate != null) { return gate; }
+                Fence gate = this.GetGate(location, pos);
+                if (gate != null)
+                    return gate;
             }
             return null;
         }
 
-        private void Event_Update(object sender, EventArgs e)
+        private void GameEvents_FourthUpdateTick(object sender, EventArgs e)
         {
-            if(StardewValley.Game1.currentLocation is StardewValley.Locations.BuildableGameLocation)
+            if (Game1.currentLocation is BuildableGameLocation location)
             {
-                List<Vector2> adj = StardewValley.Game1.player.getAdjacentTiles();
-                StardewValley.Fence gate = lookAround(adj);
+                List<Vector2> adj = Game1.player.getAdjacentTiles();
+                Fence gate = this.LookAround(location, adj);
                 if (gate != null)
                 {
-                    //myLog(gate.ToString());
+                    //MyLog(gate.ToString());
                     gate.gatePosition = 88;
                     Game1.playSound("doorClose");
                 }
 
                 //need to close it now...
-                foreach (KeyValuePair<Vector2, StardewValley.Fence> gateObj in openGates)
+                foreach (KeyValuePair<Vector2, Fence> gateObj in OpenGates)
                 {
-                    if (StardewValley.Game1.player.getTileLocation() != gateObj.Key && !adj.Contains(gateObj.Key) )
+                    if (Game1.player.getTileLocation() != gateObj.Key && !adj.Contains(gateObj.Key))
                     {
                         gateObj.Value.gatePosition = 0;
                         Game1.playSound("doorClose");
-                        openGates.Remove(gateObj.Key);
+                        OpenGates.Remove(gateObj.Key);
                         break;
                     }
                 }
             }
         }
-        
     }
 }
