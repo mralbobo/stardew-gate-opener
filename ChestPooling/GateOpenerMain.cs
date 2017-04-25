@@ -78,7 +78,7 @@ namespace GateOpener
         {
             if (Game1.currentLocation is BuildableGameLocation location)
             {
-                List<Vector2> adj = Game1.player.getAdjacentTiles();
+                List<Vector2> adj = Utility.getAdjacentTileLocations(Game1.player.getTileLocation());
                 Fence gate = this.LookAround(location, adj);
                 if (gate != null)
                 {
