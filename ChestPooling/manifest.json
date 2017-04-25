@@ -5,10 +5,9 @@
     "MajorVersion": 1,
     "MinorVersion": 0,
     "PatchVersion": 1,
-    "Build": ""
+    "Build": null
   },
-  "Description": "Opens and closes and gates based on proximity.",
-  "UniqueID": "",
-  "PerSaveConfigs": false,
+  "Description": "Opens and closes gates based on their proximity to you.",
+  "UniqueID": "mralbobo.GateOpener",
   "EntryDll": "GateOpener.dll"
 }
