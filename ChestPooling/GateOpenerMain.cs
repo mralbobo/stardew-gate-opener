@@ -9,10 +9,11 @@ using StardewValley.Locations;
 
 namespace GateOpener
 {
+    /// <summary>The mod entry class loaded by SMAPI.</summary>
     public class GateOpenerMainClass : Mod
     {
         /*********
-        ** Properties
+        ** Fields
         *********/
         private readonly Dictionary<Vector2, Fence> OpenGates = new Dictionary<Vector2, Fence>();
 
@@ -24,27 +25,13 @@ namespace GateOpener
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            GameEvents.FourthUpdateTick += this.GameEvents_FourthUpdateTick;
-        }
-
-        private void MyLog(String theString)
-        {
-#if DEBUG
-            Monitor.Log(theString);
-#endif
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
 
         /*********
         ** Private methods
         *********/
-        private void DebugThing(object data, string descriptor = "")
-        {
-            this.Helper.WriteJsonFile("debug.json", data);
-            string result = File.ReadAllText(Path.Combine(this.Helper.DirectoryPath, "debug.json"));
-            this.Monitor.Log($"{descriptor}\n{result}");
-        }
-
         private Fence GetGate(BuildableGameLocation location, Vector2 pos)
         {
             if (!location.objects.TryGetValue(pos, out StardewValley.Object obj))
@@ -69,15 +56,17 @@ namespace GateOpener
             return null;
         }
 
-        private void GameEvents_FourthUpdateTick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (Game1.currentLocation is BuildableGameLocation location)
+            if (e.IsMultipleOf(4) && Game1.currentLocation is BuildableGameLocation location)
             {
                 List<Vector2> adj = Utility.getAdjacentTileLocations(Game1.player.getTileLocation());
                 Fence gate = this.LookAround(location, adj);
                 if (gate != null)
                 {
-                    //MyLog(gate.ToString());
                     gate.gatePosition.Set(88);
                     Game1.playSound("doorClose");
                 }
